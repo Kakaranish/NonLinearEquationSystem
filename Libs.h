@@ -1,0 +1,13 @@
+#pragma once
+#include <stdio.h>
+#include <tchar.h>
+#include <iostream>
+#include <conio.h>
+#include <math.h>
+#include <iomanip>
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <stdio.h>
+#include <conio.h>
+#include <ctime>
