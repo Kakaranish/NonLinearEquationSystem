@@ -19,15 +19,15 @@ int main(int argc, char * argv[]) {
 		exit(-1);
 
 
-	std::cout << std::endl << std::endl;
+	std::cout << std::endl;
 
 	Matrix A(n,n);
 	for (int i = 0; i < n; i++)
 		for (int j = 0; j < n; j++)
-			std::cin >> (*A)(i, j);
+			std::cin >> A(i, j);
 	
 	
-	std::cout << "Wpisana przez Ciebie macierz to: " << std::endl;
+	std::cout << "\nWpisana przez Ciebie macierz to: " << std::endl;
 	std::cout << A << std::endl;
 
 	return 0;
