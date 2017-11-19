@@ -3,10 +3,6 @@
 #include <type_traits>
 #include <ostream>
 
-//Vec2 is templated class, so the definition of 
-//any functions should be inside the body of class
-//hence I haven't created .cpp file
-
 template <typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
 class Vec2 {
 public:
@@ -22,6 +18,12 @@ public:
 		}
 		return *this;
 	}
+	bool operator!=(const Vec2<T>& q) const{
+		if(this->x != q.x || this->y != q.y)
+			return true;
+		return false;
+	}
+
 	inline Vec2<T> operator+(const Vec2<T>& q) {
 		return std::move(Vec2<T>(this->x + q.x, this->y + q.y));
 	}

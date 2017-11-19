@@ -10,14 +10,13 @@ int main(int argc, char * argv[]) {
 	std::cout << "**************************************************" << std::endl;
 	std::cout << "***       PROGRAM WYKONAL STANISLAW GRUZ       ***" << std::endl;
 	std::cout << "*** POWER ITERATION DLA MACIERZY HERMITOWSKIEJ ***" << std::endl;
-	std::cout << "**************************************" << std::endl;
+	std::cout << "**************************************************" << std::endl;
 	std::cout << "UWAGA! Podajemy np. 1 2 3 4 i na koncu po podaniu wiersza wciskamy ENTER!" << std::endl;
 	std::cout << "Podaj wymiar macierzy: ";
 	std::cin >> n;
 
-	if (std::cin.fail() || n <= 0) //jesli podany cos co nie jest intem
+	if (std::cin.fail() || n <= 0)
 		exit(-1);
-
 
 	std::cout << std::endl;
 
@@ -25,10 +24,9 @@ int main(int argc, char * argv[]) {
 	for (int i = 0; i < n; i++)
 		for (int j = 0; j < n; j++)
 			std::cin >> A(i, j);
-	
-	
-	std::cout << "\nWpisana przez Ciebie macierz to: " << std::endl;
-	std::cout << A << std::endl;
+
+	A.mulitiplyByScalar(1/12.f);
+	computeEigenpairs(&A,300);
 
 	return 0;
 }
