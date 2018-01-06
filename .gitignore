@@ -1,2 +1,7 @@
 *.o
 exec
+.vs/
+Debug/
+*.sln
+*.vcxproj
+*.vcxproj.filters
