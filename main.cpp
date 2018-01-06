@@ -13,42 +13,66 @@ int main(int argc, char * argv[]) {
 
 
 	{
-		Matrix mA(4, 3);
-		mA(0, 0) = 1;
-		mA(1, 1) = 2;
-		mA(2, 2) = 3;
-		mA(0, 2) = 9;
+		
+		
+		
+		
+		Matrix mA(5, 5);
+		mA.initRandomValues(1,100);
 
+		Matrix m1(5, 2);
+		m1(0, 0) = 5;
+		m1(0, 1) = 1;
+		m1(1, 0) = -3;
+		m1(1, 1) = 3;
+		m1(2, 0) = 4;
+		m1(2, 1) = -1;
+		m1(3, 0) = -1;
+		m1(3, 1) = 2;
+		m1(4, 0) = 0;
+		m1(4, 1) = 7;
+
+		Matrix m2(2, 7);
+		m2(0, 0) = 1;
+		m2(0, 1) = 7;
+		m2(0, 2) = 0;
+		m2(0, 3) = -1;
+		m2(0, 4) = 9;
+		m2(0, 5) = 0;
+		m2(0, 6) = 5;
+
+		m2(1, 0) = 2;
+		m2(1, 1) = -6;
+		m2(1, 2) = -1;
+		m2(1, 3) = 10;
+		m2(1, 4) = 2;
+		m2(1, 5) = -3;
+		m2(1, 6) = 1;
+
+
+		std::cout << "m1 = " << std::endl;
+		std::cout << m1 << std::endl;
+		std::cout << "m2 = " << std::endl;
+		std::cout << m2 << std::endl;
+
+		std::cout << "m1 x m2" << std::endl;
+		std::cout << m1.getMultipliedByMatrix(m2) << std::endl;
+		
+		m1.multiplyByMatrix(m2);
+		std::cout << m1 << std::endl;
+
+
+
+		/*
 		Matrix vec1(1, 3);
-		Matrix vec2(1, 3);
+		vec1.initRandomValues(1,100);
 
-		vec1.initRandomValues(10,20);
-		vec2.initRandomValues(1, 5);
-
-		std::cout << "vec1 = " << std::endl;
 		std::cout << vec1 << std::endl;
-
-		vec1.normalizeVector();
+		vec1.transpose();
 		std::cout << vec1 << std::endl;
-
-		std::cout << vec1.findPerpendicularVector() << std::endl;
-
-		vec1.mulitiplyByScalar(3);
-		std::cout << vec1;
-
-		std::cout << "mA = " << std::endl;
-		std::cout << mA << std::endl;
-		mA.mulitiplyByScalar(3);
-		std::cout << mA << std::endl;
-
-		try {
-			std::cout << "vec1 o vec2 = " << vec1.getScalarProduct(vec2) << std::endl;
-		}
-		catch (std::exception e) {
-			std::cout << e.what() << std::endl;
-		}
-
-
+		vec1.transpose();
+		std::cout << vec1 << std::endl;
+		*/
 
 
 	}

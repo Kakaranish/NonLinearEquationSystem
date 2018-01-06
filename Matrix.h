@@ -50,10 +50,13 @@ public:
 	Matrix(Matrix&&) noexcept;
 	~Matrix();
 
+
 	//Operations on matrices
-	void mulitiplyByScalar(double scalar);
+	void multiplyByScalar(double scalar);
 	Matrix getMultipliedByScalar(double scalar);
+	void multiplyByMatrix(Matrix const& B);
 	Matrix getMultipliedByMatrix(Matrix const &B);
+	void transpose();
 	Matrix getTransposed(); 
 	void interchangeRows(unsigned r1, unsigned r2);
 	void addRow(unsigned baseRow, unsigned addedRow, double multiplier);
@@ -64,16 +67,16 @@ public:
 	bool isVerticalVector() const;
 	double getVectorLength();
 	void normalizeVector();
-	//Matrix getNormalizedVector(); //TODO
+	Matrix getNormalizedVector();
 	double getScalarProduct(const Matrix& matrix);
 	Matrix findPerpendicularVector();
 
 
-	
 	//Overloading operators
 	double& operator()(unsigned row, unsigned col); //Accessor to specific element of arr
 	Matrix& operator=(Matrix && B);
 	Matrix& operator-=(const Matrix& matrix);
+	Matrix& operator+=(const Matrix& matrix);
 	friend std::ostream& operator<<(std::ostream& output, const Matrix& vec);
 	
 	

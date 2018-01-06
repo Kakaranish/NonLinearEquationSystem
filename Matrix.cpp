@@ -1,11 +1,12 @@
 #include "Matrix.h"
 
 //Private functions
-void Matrix::deallocate2DArray(double** arr, unsigned rowsNum) { // Deallocating memory 
+void Matrix::deallocate2DArray(double** _arr, unsigned rowsNum) { // Deallocating memory 
 	for (unsigned i = 0; i < rowsNum; i++)
-		delete[] arr[i];
-	delete[] arr;
+		delete[] _arr[i];
+	delete[] _arr;
 }
+
 
 //Constructors and destructor
 Matrix::Matrix(unsigned rowNum, unsigned colNum) : size(MatrixSize(rowNum,colNum)){
@@ -46,10 +47,9 @@ Matrix::~Matrix() {
 	deallocate2DArray(this->arr, size.getRowsNum());
 }
 
+
 //Operations on matrices
-//TODO
-//multiply
-void Matrix::mulitiplyByScalar(double scalar) {
+void Matrix::multiplyByScalar(double scalar) {
 	Matrix temp(*this);
 	for (unsigned i = 0; i < size.getRowsNum(); i++)
 		for (unsigned j = 0; j < size.getColNum(); j++)
@@ -63,9 +63,30 @@ Matrix Matrix::getMultipliedByScalar(double scalar){
 			temp(i,j) = temp(i,j) * scalar;
 	return std::move(temp);
 }
-Matrix Matrix::getMultipliedByMatrix(Matrix const &B) {
+void Matrix::multiplyByMatrix(Matrix const& B) {
 	if (size.getColNum() != B.size.getRowsNum())
 		throw MatrixException("Unable to multiply matrices! Wrong dimensions!");
+
+	double** tmpArr = arr;
+	unsigned prevColNum = size.getColNum();
+	size = MatrixSize(size.getRowsNum(), B.size.getColNum());
+
+	arr = nullptr;
+	arr = new double*[size.getRowsNum()];
+	for (int i = 0; i < size.getRowsNum(); i++) {
+		arr[i] = new double[size.getColNum()];
+		for (int j = 0; j < size.getColNum(); j++) {
+			double sum = 0;
+			for (unsigned k = 0; k < prevColNum; k++)
+				sum += (tmpArr[i][k] * B.arr[k][j]);
+			arr[i][j] = sum;
+		}
+	}
+	deallocate2DArray(tmpArr, size.getRowsNum());
+}
+Matrix Matrix::getMultipliedByMatrix(Matrix const &B) {
+	if (size.getColNum() != B.size.getRowsNum())
+		throw MatrixException("Unable to get multiplied matrices! Wrong dimensions!");
 
 	Matrix rMatrix(size.getRowsNum(), B.size.getColNum());
 	for (unsigned i = 0; i < size.getRowsNum(); i++) //iterate A matrix through columns
@@ -77,8 +98,30 @@ Matrix Matrix::getMultipliedByMatrix(Matrix const &B) {
 		}
 	return rMatrix;
 }
-//TODO
-//transpose
+void Matrix::transpose() {
+	if (size.getColNum() != size.getRowsNum()) {
+
+		double** tmpPtr = arr;
+		arr = nullptr;
+
+
+		this->size = MatrixSize(size.getColNum(), size.getRowsNum());
+		arr = new double*[size.getRowsNum()];
+		for (int i = 0; i < size.getRowsNum(); i++) {
+			arr[i] = new double[size.getColNum()];
+			for (int j = 0; j < size.getColNum(); j++) 
+				arr[i][j] = tmpPtr[j][i];
+		}
+		//We want to deallocate previous arr after copying values
+		deallocate2DArray(tmpPtr, size.getColNum());
+	}
+	else {
+		for (int i = 0; i < size.getRowsNum(); i++)
+			for (int j = 0; j < size.getColNum(); j++)
+				if(i < j) //2x swap gives the same result, so we wanna avoid this
+					std::swap(arr[i][j], arr[j][i]);
+	}
+}
 Matrix Matrix::getTransposed() {
 	Matrix tMatrix(size.getColNum(), size.getRowsNum());
 
@@ -134,10 +177,15 @@ double Matrix::getVectorLength(){
 void Matrix::normalizeVector(){
 	if (!this->isVector())
 		throw MatrixException("Unnable to normalize vector! Matrix isn't vector");
-	this->mulitiplyByScalar(1.f/getVectorLength());
+	this->multiplyByScalar(1.f/getVectorLength());
 }
-//TODO
-//getNormalizedVector
+Matrix Matrix::getNormalizedVector() {
+	if (!this->isVector())
+		throw MatrixException("Unnable to get normalized vector! Matrix isn't vector");
+	Matrix tmpMatrix(*this);
+	tmpMatrix.multiplyByScalar(1.f / getVectorLength());
+	return tmpMatrix;
+}
 double Matrix::getScalarProduct(const Matrix& matrix){
 	if (!matrix.isVector() || !this->isVector() || matrix.size != this->size)
 		throw MatrixException("Unable to get scalar product!");
@@ -196,8 +244,15 @@ Matrix& Matrix::operator=(Matrix && B){
 	B.arr = nullptr;
 	return *this;
 }
-//TODO
-//Operator+=
+Matrix& Matrix::operator+=(const Matrix& matrix) {
+	if (this->size != matrix.size)
+		throw MatrixException("Can't use operator+= because of different dimensions!");
+	
+	for (unsigned i = 0; i<size.getRowsNum(); i++)
+		for (unsigned j = 0; j<size.getColNum(); j++)
+			arr[i][j] += matrix.arr[i][j];
+	return *this;
+}
 Matrix& Matrix::operator-=(const Matrix& matrix){
 	if(this->size != matrix.size)
 		throw MatrixException("Can't use operator-= because of different dimensions!");
