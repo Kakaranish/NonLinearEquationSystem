@@ -1,21 +1,13 @@
 #include "Matrix.h"
 
-bool Matrix::isInitialized(){
-	if (size.getRowsNum() > 0 && size.getColNum() > 0)
-		return true;
-	return false;
-}
-
-void Matrix::init() { // Filling the array with 0
-	for (unsigned i = 0; i < size.getRowsNum(); i++)
-		for (unsigned j = 0; j < size.getColNum(); j++)
-			arr[i][j] = 0;
-}
+//Private functions
 void Matrix::deallocate2DArray(double** arr, unsigned rowsNum) { // Deallocating memory 
 	for (unsigned i = 0; i < rowsNum; i++)
 		delete[] arr[i];
 	delete[] arr;
 }
+
+//Constructors and destructor
 Matrix::Matrix(unsigned rowNum, unsigned colNum) : size(MatrixSize(rowNum,colNum)){
 	arr = new double*[size.getRowsNum()];
 	for (int i = 0; i < size.getRowsNum(); i++)
@@ -29,15 +21,6 @@ Matrix::Matrix(MatrixSize size): size(size) {
 		arr[i] = new double[size.getColNum()];
 	init();
 }
-Matrix::~Matrix() {
-	if (arr == nullptr)
-	{
-		//std::cout << "Nothing to deallocate" << std::endl;
-		return; //nothing to deallocate
-	}
-	
-	deallocate2DArray(this->arr, size.getRowsNum());
-}
 Matrix::Matrix(const Matrix& matrix) {
 	size = matrix.size;
 	arr = new double*[size.getRowsNum()];
@@ -48,13 +31,38 @@ Matrix::Matrix(const Matrix& matrix) {
 		}
 	}
 }
-Matrix::Matrix(Matrix && movedMatrix) noexcept{
+Matrix::Matrix(Matrix&& movedMatrix) noexcept{
 	arr = std::move(movedMatrix.arr);
 	size = std::move(movedMatrix.size);
 	movedMatrix.arr = nullptr;
 }
+Matrix::~Matrix() {
+	if (arr == nullptr)
+	{
+		//std::cout << "Nothing to deallocate" << std::endl;
+		return; //nothing to deallocate
+	}
+	
+	deallocate2DArray(this->arr, size.getRowsNum());
+}
+
+//Operations on matrices
 //TODO
 //multiply
+void Matrix::mulitiplyByScalar(double scalar) {
+	Matrix temp(*this);
+	for (unsigned i = 0; i < size.getRowsNum(); i++)
+		for (unsigned j = 0; j < size.getColNum(); j++)
+			temp(i, j) = temp(i, j) * scalar;
+	*this = std::move(temp);
+}
+Matrix Matrix::getMultipliedByScalar(double scalar){
+	Matrix temp(*this);
+	for(unsigned i=0;i<size.getRowsNum();i++)
+		for(unsigned j=0;j<size.getColNum();j++)
+			temp(i,j) = temp(i,j) * scalar;
+	return std::move(temp);
+}
 Matrix Matrix::getMultipliedByMatrix(Matrix const &B) {
 	if (size.getColNum() != B.size.getRowsNum())
 		throw MatrixException("Unable to multiply matrices! Wrong dimensions!");
@@ -97,33 +105,17 @@ void Matrix::addRow(unsigned baseRow, unsigned addedRow, double multiplier) {
 	for (unsigned i = 0; i < size.getColNum(); i++)
 		arr[baseRow][i] += arr[addedRow][i] * multiplier;
 }
-double& Matrix::operator()(unsigned row, unsigned col) {
-	if (row >= size.getRowsNum() || col >= size.getColNum())
-		throw MatrixException("Out of range! Unable to get access to specific element!");
-	return arr[row][col];
+
+
+//Vector functions
+bool Matrix::isVector() const {
+	return ((size.getColNum() > 0 && size.getRowsNum() > 0)
+		&& (size.getRowsNum() == 1 || size.getColNum() == 1)) ? true : false;
 }
-Matrix& Matrix::operator=(Matrix && B){
-	deallocate2DArray(this->arr, size.getRowsNum());
-	this->size = std::move(B.size);
-
-	arr = std::move(B.arr);
-
-	B.arr = nullptr;
-	return *this;
-}
-double Matrix::getScalarProduct(const Matrix& matrix){
-	if (!matrix.isVector() || !this->isVector() || matrix.size != this->size)
-		throw MatrixException("Unable to get scalar product!");
-	
-	double sum = 0;
-	if(size.getColNum() > 1)
-		for(int i=0;i<size.getColNum();i++)
-			sum += arr[0][i] * matrix.getArrPtr()[0][i];
-	else
-		for(int i=0;i<size.getRowsNum();i++)
-			sum += arr[i][0] * matrix.getArrPtr()[i][0];
-
-	return sum;
+bool Matrix::isVerticalVector()  const{
+	if (!isVector())
+		throw MatrixException("Can't check if vector is vertical! Matrix isn't vector!");
+	return (size.getRowsNum() == 1) ? false : true;
 }
 double Matrix::getVectorLength(){
 	if (!isVector())
@@ -139,12 +131,26 @@ double Matrix::getVectorLength(){
 	}
 	return sqrt(sum);
 }
-//TODO
-//Get normalized
 void Matrix::normalizeVector(){
 	if (!this->isVector())
 		throw MatrixException("Unnable to normalize vector! Matrix isn't vector");
 	this->mulitiplyByScalar(1.f/getVectorLength());
+}
+//TODO
+//getNormalizedVector
+double Matrix::getScalarProduct(const Matrix& matrix){
+	if (!matrix.isVector() || !this->isVector() || matrix.size != this->size)
+		throw MatrixException("Unable to get scalar product!");
+	
+	double sum = 0;
+	if(size.getColNum() > 1)
+		for(int i=0;i<size.getColNum();i++)
+			sum += arr[0][i] * matrix.getArrPtr()[0][i];
+	else
+		for(int i=0;i<size.getRowsNum();i++)
+			sum += arr[i][0] * matrix.getArrPtr()[i][0];
+
+	return sum;
 }
 Matrix Matrix::findPerpendicularVector(){
 	if(!this->isVector())
@@ -173,21 +179,23 @@ Matrix Matrix::findPerpendicularVector(){
 
 	return std::move(temp);
 }
-void Matrix::mulitiplyByScalar(double scalar) {
-	Matrix temp(*this);
-	for (unsigned i = 0; i < size.getRowsNum(); i++)
-		for (unsigned j = 0; j < size.getColNum(); j++)
-			temp(i, j) = temp(i, j) * scalar;
-	*this = std::move(temp);
-}
-Matrix Matrix::getMultipliedByScalar(double scalar){
-	Matrix temp(*this);
-	for(unsigned i=0;i<size.getRowsNum();i++)
-		for(unsigned j=0;j<size.getColNum();j++)
-			temp(i,j) = temp(i,j) * scalar;
-	return std::move(temp);
-}
 
+
+//Overloading operators
+double& Matrix::operator()(unsigned row, unsigned col) {
+	if (row >= size.getRowsNum() || col >= size.getColNum())
+		throw MatrixException("Out of range! Unable to get access to specific element!");
+	return arr[row][col];
+}
+Matrix& Matrix::operator=(Matrix && B){
+	deallocate2DArray(this->arr, size.getRowsNum());
+	this->size = std::move(B.size);
+
+	arr = std::move(B.arr);
+
+	B.arr = nullptr;
+	return *this;
+}
 //TODO
 //Operator+=
 Matrix& Matrix::operator-=(const Matrix& matrix){
@@ -207,14 +215,18 @@ std::ostream& operator<<(std::ostream& output, const Matrix& _m) {
 	}
 	return output;
 }
-bool Matrix::isVector() const {
-	return ((size.getColNum() > 0 && size.getRowsNum() > 0)
-		&& (size.getRowsNum() == 1 || size.getColNum() == 1)) ? true : false;
+
+
+//Misc functions
+bool Matrix::isInitialized(){
+	if (size.getRowsNum() > 0 && size.getColNum() > 0)
+		return true;
+	return false;
 }
-bool Matrix::isVerticalVector()  const{
-	if (!isVector())
-		throw MatrixException("Can't check if vector is vertical! Matrix isn't vector!");
-	return (size.getRowsNum() == 1) ? false : true;
+void Matrix::init() { // Filling the array with 0
+	for (unsigned i = 0; i < size.getRowsNum(); i++)
+		for (unsigned j = 0; j < size.getColNum(); j++)
+			arr[i][j] = 0;
 }
 void Matrix::initRandomValues(int intervalBeg, int intervalEnd) {	
 	if (intervalBeg > intervalEnd)

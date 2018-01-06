@@ -44,7 +44,7 @@ private:
 	static void deallocate2DArray(double** arr, unsigned size_y); //Dealocating double** arr
 public:
 	//Constructors and destructor
-	Matrix(unsigned y_size, unsigned x_size); 
+	Matrix(unsigned rowNum, unsigned colNum); 
 	Matrix(MatrixSize); //this constructor is equivalent to the above
 	Matrix(const Matrix&);
 	Matrix(Matrix&&) noexcept;
@@ -61,7 +61,6 @@ public:
 
 	//Vector functions
 	bool isVector() const;
-
 	bool isVerticalVector() const;
 	double getVectorLength();
 	void normalizeVector();
@@ -72,10 +71,9 @@ public:
 
 	
 	//Overloading operators
-	double& operator()(unsigned y, unsigned x); //Accessor to specific element of arr
+	double& operator()(unsigned row, unsigned col); //Accessor to specific element of arr
 	Matrix& operator=(Matrix && B);
 	Matrix& operator-=(const Matrix& matrix);
-	//Matrix& operator=(Matrix B); ?????
 	friend std::ostream& operator<<(std::ostream& output, const Matrix& vec);
 	
 	
