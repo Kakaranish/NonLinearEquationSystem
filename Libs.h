@@ -10,4 +10,9 @@
 #include <ctime>
 #include <utility>
 #include <conio.h>
+#include <algorithm>
 #include <functional>
+
+#define	converge_epsilon 10e-7
+typedef std::function<double(std::vector<double>)> function_t;
+typedef std::pair<double, function_t> pair_t;

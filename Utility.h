@@ -1,9 +1,8 @@
 #pragma once
 #include "Libs.h"
 #include "Matrix.h"
-
-std::pair<double, Matrix*> computeLeadingEigenpair(Matrix* matrix, int steps);
-void computeEigenpairs(Matrix*, int steps);
+#include "VectorOfFunctions.h"
 
 bool gauss(Matrix A, Matrix& X, Matrix B);
-
+Matrix findRoot(std::initializer_list<pair_t> f_list, Matrix initVec, int steps);
+std::vector<Matrix> findRoots(std::initializer_list<pair_t> f_list, int vecSize, int numOfRandomVectors, int steps);

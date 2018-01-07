@@ -6,6 +6,10 @@ void Matrix::deallocate2DArray(double** _arr, unsigned rowsNum) { // Deallocatin
 		delete[] _arr[i];
 	delete[] _arr;
 }
+double Matrix::round_nplaces(double value, int to){
+	double places = pow(10.0, to);
+	return round(value * places) / places;
+}
 
 
 //Constructors and destructor
@@ -227,7 +231,22 @@ Matrix Matrix::findPerpendicularVector(){
 
 	return std::move(temp);
 }
+std::vector<double> Matrix::toVectorList() {
+	if (!isVector())
+		throw MatrixException("Matrix isn't vector! Can't convert to std::vector<double>!");
 
+	std::vector<double> t_vec;
+	if (isVerticalVector()) {
+		for (int i = 0; i < size.getRowsNum(); i++)
+			t_vec.push_back(arr[i][0]);
+		return t_vec;
+	}
+	else {
+		for (int i = 0; i < size.getColNum(); i++)
+			t_vec.push_back(arr[0][i]);
+		return t_vec;
+	}
+}
 
 //Overloading operators
 double& Matrix::operator()(unsigned row, unsigned col) {
@@ -235,13 +254,45 @@ double& Matrix::operator()(unsigned row, unsigned col) {
 		throw MatrixException("Out of range! Unable to get access to specific element!");
 	return arr[row][col];
 }
-Matrix& Matrix::operator=(Matrix && B){
+bool Matrix::operator==(const Matrix& matrix) {
+	if (size != matrix.size)
+		return false;
+	for (int i = 0; i < size.getRowsNum(); i++)
+		for (int j = 0; j < size.getColNum(); j++)
+			if (arr[i][j] != matrix.arr[i][j])
+				return false;
+	return true;
+}
+bool Matrix::operator!=(const Matrix& matrix) {
+	if (size != matrix.size)
+		return true;
+	for (int i = 0; i < size.getRowsNum(); i++)
+		for (int j = 0; j < size.getColNum(); j++)
+			if (arr[i][j] != matrix.arr[i][j])
+				return true;
+	return false;
+}
+Matrix& Matrix::operator=(Matrix&& B){
 	deallocate2DArray(this->arr, size.getRowsNum());
 	this->size = std::move(B.size);
 
 	arr = std::move(B.arr);
 
 	B.arr = nullptr;
+	return *this;
+}
+Matrix& Matrix::operator=(const Matrix& B) {
+	deallocate2DArray(this->arr, size.getRowsNum());
+	size = B.size;
+
+	
+	arr = new double*[size.getRowsNum()];
+	for (int i = 0; i < B.size.getRowsNum(); i++) {
+		arr[i] = new double[size.getColNum()];
+		for (int j = 0; j < B.size.getColNum(); j++)
+			arr[i][j] = B.arr[i][j];
+	}
+		
 	return *this;
 }
 Matrix& Matrix::operator+=(const Matrix& matrix) {
@@ -270,6 +321,26 @@ std::ostream& operator<<(std::ostream& output, const Matrix& _m) {
 	}
 	return output;
 }
+Matrix Matrix::operator+(const Matrix& matrix) {
+	if (size != matrix.size)
+		throw MatrixException("Unable to add matrixes! Different dimensions!");
+
+	Matrix tMatrix(size);
+	for (int i = 0; i < size.getRowsNum(); i++)
+		for (int j = 0; j < size.getColNum(); j++)
+			tMatrix(i, j) = arr[i][j] + matrix.arr[i][j];
+	return tMatrix;
+}
+Matrix Matrix::operator-(const Matrix& matrix) {
+	if (size != matrix.size)
+		throw MatrixException("Unable to add matrixes! Different dimensions!");
+
+	Matrix tMatrix(size);
+	for (int i = 0; i < size.getRowsNum(); i++)
+		for (int j = 0; j < size.getColNum(); j++)
+			tMatrix(i, j) = arr[i][j] - matrix.arr[i][j];
+	return tMatrix;
+}
 
 
 //Misc functions
@@ -294,4 +365,9 @@ void Matrix::initRandomValues(int intervalBeg, int intervalEnd) {
 	for (int i = 0; i < size.getRowsNum(); i++)
 		for (int j = 0; j < size.getColNum(); j++)
 			arr[i][j] = distribution(generator);
+}
+void Matrix::roundMatrix(int to) {
+	for (int i = 0; i < size.getRowsNum(); i++)
+		for (int j = 0; j < size.getColNum(); j++)
+			arr[i][j] = round_nplaces(arr[i][j], 5);
 }

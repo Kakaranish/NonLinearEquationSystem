@@ -41,6 +41,7 @@ protected:
 	MatrixSize size;
 private:
 	static void deallocate2DArray(double** arr, unsigned size_y); //Dealocating double** arr
+	double round_nplaces(double value, int to);
 public:
 	//Constructors and destructor
 	Matrix(unsigned rowNum, unsigned colNum); 
@@ -69,16 +70,22 @@ public:
 	Matrix getNormalizedVector();
 	double getScalarProduct(const Matrix& matrix);
 	Matrix findPerpendicularVector();
+	std::vector<double> toVectorList();
 
 
 	//Overloading operators
 	double& operator()(unsigned row, unsigned col); //Accessor to specific element of arr
-	Matrix& operator=(Matrix && B);
+	bool operator==(const Matrix& matrix);
+	bool operator!=(const Matrix& matrix);
+	Matrix& operator=(Matrix&& matrix);
+	Matrix& operator=(const Matrix& matrix);
 	Matrix& operator-=(const Matrix& matrix);
 	Matrix& operator+=(const Matrix& matrix);
 	friend std::ostream& operator<<(std::ostream& output, const Matrix& vec);
+	Matrix operator+(const Matrix& matrix);
+	Matrix operator-(const Matrix& matrix);
 	
-	
+
 	//Misc functions
 	bool isInitialized();
 	void init(); //Fill the matrix with zeros
@@ -86,5 +93,7 @@ public:
 	MatrixSize getSize() const { return size; }
 	void setArrToNullptr() { arr = nullptr; }
 	double** getArrPtr() const { return arr; }
+
+	void roundMatrix(int to);
 };
 

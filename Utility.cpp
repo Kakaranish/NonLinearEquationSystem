@@ -1,49 +1,5 @@
     #include "Utility.h"
 
-    std::pair<double, Matrix*> computeLeadingEigenpair(Matrix* matrix, int steps){
-        if(matrix->getSize().getColNum()!= matrix->getSize().getRowsNum()){
-            std::cout << "Given matrix in not square!" << std::endl;
-            exit(-1);
-        }
-        
-        unsigned dimension = matrix->getSize().getColNum();
-        Matrix* prevVec = new Matrix(dimension, 1);
-        
-        for(unsigned i=0;i<dimension;i++)
-            (*prevVec)(i, 0) = (std::rand()% 10) + 1;
-        std::cout << "\nRandom vector = " << prevVec->getTransposed();
-        prevVec->normalizeVector();
-        std::cout << "Normalized random vector = "<< prevVec->getTransposed() << std::endl;
-
-
-        Matrix vecMultResult(dimension, 1);
-        for(unsigned i=0;i<steps;i++){
-            vecMultResult = matrix->getMultipliedByMatrix(*prevVec); 
-            *prevVec = vecMultResult.getMultipliedByScalar(1.f/vecMultResult.getVectorLength());
-        }
-        return std::pair<double, Matrix*>(vecMultResult.getVectorLength(), prevVec);
-    }
-	void computeEigenpairs(Matrix* matrix, int steps){
-        std::pair<double, Matrix*> leadingEigenpair = computeLeadingEigenpair(matrix, steps);
-        std::cout << "Wiodąca wartość własna = " << leadingEigenpair.first << std::endl;
-        std::cout << "Wiodący wektor własny = "<< leadingEigenpair.second->getTransposed();
-
-        unsigned dimension = matrix->getSize().getColNum();
-        Matrix* prevVec = new Matrix(dimension, 1);
-        *prevVec = leadingEigenpair.second->findPerpendicularVector();
-        prevVec->normalizeVector();
-        Matrix vecMultResult(dimension,1);
-
-        for(unsigned i=0;i<steps;i++){
-            vecMultResult = matrix->getMultipliedByMatrix(*prevVec); 
-            vecMultResult -= leadingEigenpair.second->getMultipliedByMatrix(leadingEigenpair.second->getTransposed().getMultipliedByMatrix(vecMultResult));
-            *prevVec = vecMultResult.getMultipliedByScalar(1.f/vecMultResult.getVectorLength());
-        }
-
-        std::cout << "Druga wiodąca wartość własna = " << vecMultResult.getVectorLength() << std::endl;
-        std::cout << "Drugi wiodący wektor własny = " << prevVec->getTransposed();
-    }
-
 	//We want to operate on copied variables
 	bool gauss(Matrix A, Matrix& X, Matrix B) {
 
@@ -89,4 +45,71 @@
 			X(i, 0) = s / AB(i, i);
 		}
 		return true;
+	}
+	Matrix findRoot(std::initializer_list<pair_t> f_list, Matrix initVec, int steps) {
+
+		VectorOfFunctions func_vec(f_list);
+
+		//Step 1 - init vec_x_i
+		Matrix vec_x_i = initVec;
+
+		//Step 2 - compute J(vec_x_i), F(vec_x_i)
+		auto J_x_i = func_vec.computeJacobianInPoint(vec_x_i.toVectorList());
+		auto F_x_i = func_vec.computeValuesVector(vec_x_i.toVectorList());
+
+
+		//Step 3 - compute y_x_i from equation J(vec_x_i)y_x_i = -F(vec_x_i)
+		Matrix y_i(func_vec.getArgc(), 1);
+
+		try {
+			bool hasSolution = gauss(J_x_i, y_i, F_x_i.getMultipliedByScalar(-1));
+			if (hasSolution) {
+				//std::cout << y_i;
+			}
+
+		}
+		catch (std::exception e) {
+			std::cout << e.what() << std::endl;
+		}
+
+
+		Matrix vec_x_next_i(vec_x_i + y_i);
+		for (int i = 0; i < steps; i++) {
+			//Step 4 - compute vec_x_next_i
+			//Step 5 - till convergent!
+
+			if (i != 0)
+				vec_x_next_i = vec_x_i + y_i;
+
+
+			vec_x_i = vec_x_next_i;
+			J_x_i = func_vec.computeJacobianInPoint(vec_x_i.toVectorList());
+			F_x_i = func_vec.computeValuesVector(vec_x_i.toVectorList());
+
+			try {
+				bool hasSolution = gauss(J_x_i, y_i, F_x_i.getMultipliedByScalar(-1));
+				if (hasSolution) {
+					//std::cout << y_i;
+				}
+			}
+			catch (std::exception e) {
+				std::cout << e.what() << std::endl;
+			}
+		}
+		return vec_x_next_i;
+	}
+	std::vector<Matrix> findRoots(std::initializer_list<pair_t> f_list, int vecSize, int numOfRandomVectors, int steps) {
+		std::vector<Matrix> rootsVector;
+
+		Matrix initVec(vecSize, 1);
+
+		for (int i = 0; i < numOfRandomVectors; i++) {
+			initVec.initRandomValues(-100, 100);
+			auto tVec = findRoot(f_list, initVec, steps);
+			tVec.roundMatrix(5);
+
+			if (!(std::find(rootsVector.begin(), rootsVector.end(), tVec) != rootsVector.end())) 
+				rootsVector.push_back(tVec);	
+		}
+		return rootsVector;
 	}

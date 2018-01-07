@@ -16,7 +16,7 @@ double VectorOfFunctions::getDerivative(unsigned functionNum, unsigned differedV
 }
 
 //Constructor
-VectorOfFunctions::VectorOfFunctions(std::initializer_list<func_pair> list) {
+VectorOfFunctions::VectorOfFunctions(std::initializer_list<pair_t> list) {
 	int func_num = list.size();
 
 	for (auto& x : list) {
@@ -43,6 +43,12 @@ std::vector<double> VectorOfFunctions::getDefaultArgsVector() {
 
 	return argsVector;
 }
+Matrix VectorOfFunctions::getDefaultArgsMatrix() {
+	Matrix tMatrix(argc, 1);
+	for (int i = 0; i < argc; i++)
+		tMatrix(i, 0) = 1;
+	return tMatrix;
+}
 //point = (args(0),args(1),...,(args(argc))
 Matrix VectorOfFunctions::computeJacobianInPoint(std::vector<double> args) {
 	Matrix jacobianMatrix(argc, argc);
@@ -56,4 +62,7 @@ Matrix VectorOfFunctions::computeJacobianInPoint(std::vector<double> args) {
 		}
 	}
 	return jacobianMatrix;
+}
+unsigned VectorOfFunctions::getArgc() const {
+	return argc;
 }
